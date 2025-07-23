@@ -1,47 +1,22 @@
 pipeline {
-    agent any
-
-    stages {
-        stage('Clone') {
-            steps {
-                echo 'Cloning the repository...'
-                // Git auto-clone if you configure repo in Jenkins job
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Building the application...'
-                sh 'chmod +x hello.sh'
-            }
-        }
-
-        stage('Run Script') {
-            steps {
-                echo 'Running the script...'
-                sh './hello.sh'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Testing...'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo 'Deploying...'
-            }
+    agent {
+        docker {
+            image 'python:3.10-slim'
         }
     }
-
-    post {
-        success {
-            echo 'Pipeline finished successfully!'
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install flask'
+            }
         }
-        failure {
-            echo 'Pipeline failed.'
+
+        stage('Run Flask App') {
+            steps {
+                sh 'python app.py &'
+                sh 'sleep 5'
+                sh 'curl http://localhost:5000'
+            }
         }
     }
 }
